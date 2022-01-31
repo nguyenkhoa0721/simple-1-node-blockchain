@@ -39,8 +39,8 @@ class Transaction {
   }
 
   verifySig(publicKey, sig, msg) {
-    publicKey = Buffer.from(publicKey, "base64");
-    sig = Buffer.from(sig, "base64");
+    publicKey = Buffer.from(publicKey, "hex");
+    sig = Buffer.from(sig, "hex");
     msg = crypto.createHash("sha256").update(msg).digest();
     return eccrypto
       .verify(publicKey, msg, sig)
