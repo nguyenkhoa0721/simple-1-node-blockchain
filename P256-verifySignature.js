@@ -3,7 +3,7 @@ const crypto = require("crypto");
 var ec = new EC("p256");
 
 let pubKey = Buffer.from(
-  "04b6e5a7f376b1f0c07251d6e9250c5e35ab43543c795ed89906b3ccbd8f2a3f75f9494daa4610ec34de458922fa2f3b1d03b94e3379ad752d190357f88e8256f2",
+  "04165f8d4a634bb17f847e8d084a0fd09698ada5fadc91c0efa8d8c048b8028b7c5e3a12066c7ebc6ab9cda3785392d7cc4f49cc945e6f7787785ad7f49cba9449",
   "hex"
 );
 let key = ec.keyFromPublic(pubKey);
@@ -11,8 +11,6 @@ let key = ec.keyFromPublic(pubKey);
 msg32 = Buffer.from("Kidmo");
 const msgHash = crypto.createHash("sha256").update(msg32).digest();
 
-console.log(msgHash)
-
 let signature =
-  "3045022100b7b58ceabbc1d6d0a8c973ff31440026528a8f53cabd6eaddbefe35593676493022056f970683e11620e8f11eb88a17dcdf3ce5d380911028a22d72b3db9159730d2";
+  "304502206452447c630799e209158d2eb215e39d05a7a732725cfe72f9ea5bce29cbe3aa022100edaa36d17ed3d0678c1f2c57e3bc9870fd6e0cab49bfcbfdf483e3a2e879dfe4";
 console.log(key.verify(msgHash, signature));
