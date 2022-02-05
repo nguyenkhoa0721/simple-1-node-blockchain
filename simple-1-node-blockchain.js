@@ -9,7 +9,9 @@ const { ErrorReporting } = require("@google-cloud/error-reporting");
 var ec = new EC("p256");
 
 const app = express();
-const errors = new ErrorReporting();
+const errors = new ErrorReporting({
+  reportMode: "always",
+});
 
 app.use(errors.express);
 app.use(express.json());
