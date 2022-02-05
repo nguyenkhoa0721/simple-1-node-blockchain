@@ -4,16 +4,10 @@ var EC = require("elliptic").ec;
 const uuid = require("uuid");
 const nodePersist = require("node-persist");
 const express = require("express");
-const { ErrorReporting } = require("@google-cloud/error-reporting");
 
 var ec = new EC("p256");
 
 const app = express();
-const errors = new ErrorReporting({
-  reportMode: "always",
-});
-
-app.use(errors.express);
 app.use(express.json());
 const port = 3000;
 
@@ -184,35 +178,48 @@ app.get("/", (req, res) => {
 });
 
 app.post("/transaction", async (req, res) => {
-  let transaction = new Transaction(req.body.txOutId, req.body.address, req.body.signature);
-  let validRes = await transaction.vaild();
-  if (validRes.error) {
-    return res.status(500).send(validRes);
+  try {
+    let transaction = new Transaction(req.body.txOutId, req.body.address, req.body.signature);
+    let validRes = await transaction.vaild();
+    if (validRes.error) {
+      return res.status(500).send(validRes);
+    }
+    let block = await blockchain.addBlock(new Block(transaction));
+    blockchain.removeUTXO(validRes.index);
+    blockchain.addUTXO(new UnspentTxOut(transaction.txid, transaction.address, transaction.data));
+    return res.status(200).send(block);
+  } catch (error) {
+    console.log(error);
   }
-  let block = await blockchain.addBlock(new Block(transaction));
-  blockchain.removeUTXO(validRes.index);
-  blockchain.addUTXO(new UnspentTxOut(transaction.txid, transaction.address, transaction.data));
-  return res.status(200).send(block);
 });
 
 app.post("/create", async (req, res) => {
-  req.body.txOutId = "-1";
-  let ticket = new Ticket(
-    req.body.ticket.name,
-    req.body.ticket.description,
-    req.body.ticket.location,
-    req.body.ticket.category,
-    req.body.ticket.start,
-    req.body.ticket.end
-  );
-  let transaction = new Transaction(req.body.txOutId, req.body.address, req.body.signature, ticket);
-  let validRes = transaction.vaild();
-  if (validRes.error) {
-    return res.status(500).send(validRes);
+  try {
+    req.body.txOutId = "-1";
+    let ticket = new Ticket(
+      req.body.ticket.name,
+      req.body.ticket.description,
+      req.body.ticket.location,
+      req.body.ticket.category,
+      req.body.ticket.start,
+      req.body.ticket.end
+    );
+    let transaction = new Transaction(
+      req.body.txOutId,
+      req.body.address,
+      req.body.signature,
+      ticket
+    );
+    let validRes = transaction.vaild();
+    if (validRes.error) {
+      return res.status(500).send(validRes);
+    }
+    let block = await blockchain.addBlock(new Block(transaction));
+    blockchain.addUTXO(new UnspentTxOut(transaction.txid, transaction.address, transaction.data));
+    return res.status(200).send(block);
+  } catch (error) {
+    console.log(error);
   }
-  let block = await blockchain.addBlock(new Block(transaction));
-  blockchain.addUTXO(new UnspentTxOut(transaction.txid, transaction.address, transaction.data));
-  return res.status(200).send(block);
 });
 
 app.get("/uxto", async (req, res) => {
@@ -235,16 +242,6 @@ app.get("/history", async (req, res) => {
   }
 });
 
-app.get("/error", (req, res, next) => {
-  res.send("Something broke!");
-  next(new Error("Custom error message"));
-});
-
-app.get("/exception", () => {
-  JSON.parse('{"malformedJson": true');
-});
-
 app.listen(port, () => {
-  console.log(`App listening on port ${port}`);
-  console.log("Press Ctrl+C to quit.");
+  console.log(`Start on port ${port}`);
 });
