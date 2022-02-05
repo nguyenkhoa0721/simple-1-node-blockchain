@@ -8,9 +8,9 @@ let pubKey = Buffer.from(
 );
 let key = ec.keyFromPublic(pubKey);
 
-msg32 = Buffer.from("Kidmo");
+msg32 = Buffer.from("f55a612e08cdb3b64a813316bbb1a19005dec37acd466614fe52fb5877d3fd3c");
 const msgHash = crypto.createHash("sha256").update(msg32).digest();
 
 let signature =
-  "304502206452447c630799e209158d2eb215e39d05a7a732725cfe72f9ea5bce29cbe3aa022100edaa36d17ed3d0678c1f2c57e3bc9870fd6e0cab49bfcbfdf483e3a2e879dfe4";
+  "3044022008a210348d4d3812664bfae9335df566132e82ce624b9a9afcad6ee578bc80c80220082823916afed53099cc489be67c1c43ab4e9272630f20ddd2e922831339bc15";
 console.log(key.verify(msgHash, signature));

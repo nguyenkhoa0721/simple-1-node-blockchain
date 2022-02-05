@@ -4,10 +4,14 @@ var EC = require("elliptic").ec;
 const uuid = require("uuid");
 const nodePersist = require("node-persist");
 const express = require("express");
+const { ErrorReporting } = require("@google-cloud/error-reporting");
 
 var ec = new EC("p256");
 
 const app = express();
+const errors = new ErrorReporting();
+
+app.use(errors.express);
 app.use(express.json());
 const port = 3000;
 
@@ -229,6 +233,16 @@ app.get("/history", async (req, res) => {
   }
 });
 
+app.get("/error", (req, res, next) => {
+  res.send("Something broke!");
+  next(new Error("Custom error message"));
+});
+
+app.get("/exception", () => {
+  JSON.parse('{"malformedJson": true');
+});
+
 app.listen(port, () => {
-  console.log(`Start on port ${port}`);
+  console.log(`App listening on port ${port}`);
+  console.log("Press Ctrl+C to quit.");
 });
